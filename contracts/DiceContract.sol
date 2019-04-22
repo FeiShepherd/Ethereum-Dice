@@ -1,7 +1,14 @@
-pragma solidity ^0.4.22;
+pragma solidity ^0.5.0;
 
 
 contract DiceContract {
-  constructor() public {
-  }
+    uint storedData;
+
+    function set(uint x, uint y) public {
+        storedData = x+y;
+    }
+
+    function get() public view returns (uint) {
+        return storedData;
+    }
 }
