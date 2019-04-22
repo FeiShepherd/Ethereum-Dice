@@ -1,9 +1,21 @@
 const DiceContract = artifacts.require('DiceContract')
 
-const methods = [
-  'set(uint256,uint256)',
-  'get()'
-]
+const spec = {
+  name: 'DiceContract',
+  methods: [
+    {
+      type: 'fallback',
+    },
+    {
+      name: 'set',
+      inputs: [{name: 'x', type: 'uint256'}, {name: 'y', type: 'uint256'}],
+    },
+    {
+      name: 'get',
+      inputs: [],
+    },
+  ],
+}
 
 contract('DiceContract', async () => {
   it('should be named DiceContract', async () => {
@@ -13,9 +25,14 @@ contract('DiceContract', async () => {
   })
   it('should have correct methods', async () => {
     let instance = await DiceContract.deployed()
-    methods.forEach( method => {
-      assert.equal(typeof instance.contract.methods[method], 'function')
+
+    instance.contract._jsonInterface.forEach((method, index) => {
+      Object.keys(spec.methods[index]).forEach(val => {
+        assert.equal(
+          JSON.stringify(spec.methods[index][val]),
+          JSON.stringify(method[val]),
+        )
+      })
     })
-    assert.equal(Object.keys(instance.contract.methods).length/3, methods.length)
   })
 })

@@ -11,4 +11,8 @@ contract DiceContract {
     function get() public view returns (uint) {
         return storedData;
     }
+
+    function() external payable {
+      
+    }
 }
