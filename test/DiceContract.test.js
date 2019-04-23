@@ -1,38 +1,24 @@
 const DiceContract = artifacts.require('DiceContract')
 
-const spec = {
-  name: 'DiceContract',
-  methods: [
-    {
-      type: 'fallback',
-    },
-    {
-      name: 'set',
-      inputs: [{name: 'x', type: 'uint256'}, {name: 'y', type: 'uint256'}],
-    },
-    {
-      name: 'get',
-      inputs: [],
-    },
-  ],
-}
+const DEPOSIT_BALANCE = 1000
 
-contract('DiceContract', async () => {
-  it('should be named DiceContract', async () => {
-    let instance = await DiceContract.deployed()
-
-    assert.equal(instance.constructor._json.contractName, 'DiceContract')
+contract('DiceContract', async accounts => {
+  let instance
+  beforeEach(async () => {
+    instance = await DiceContract.deployed()
+    await instance.deposit({value: DEPOSIT_BALANCE})
   })
-  it('should have correct methods', async () => {
-    let instance = await DiceContract.deployed()
-
-    instance.contract._jsonInterface.forEach((method, index) => {
-      Object.keys(spec.methods[index]).forEach(val => {
-        assert.equal(
-          JSON.stringify(spec.methods[index][val]),
-          JSON.stringify(method[val]),
-        )
-      })
+  it('should deposit funds into bank', async () => {
+    let balance = await web3.eth.getBalance(instance.contract._address)
+    assert.equal(balance, DEPOSIT_BALANCE)
+  })
+  it('should refund x2 on win', () => {})
+  it('should not refund on lose', () => {})
+  it('should throw if amount sent is above balance/3', async () => {
+    let send = await web3.eth.sendTransaction({
+      from: accounts[0],
+      to: instance.contract._address,
+      value: 1000,
     })
   })
 })

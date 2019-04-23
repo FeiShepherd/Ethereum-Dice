@@ -1,18 +1,23 @@
 pragma solidity ^0.5.0;
 
+contract DiceContract  {
+  constructor() public { owner = msg.sender; }
+  address payable owner;
 
-contract DiceContract {
-    uint storedData;
+  event Paid(address indexed _from, uint _value);
 
-    function set(uint x, uint y) public {
-        storedData = x+y;
-    }
+  modifier onlyOwner {
+    require(
+      msg.sender == owner,
+      "Only owner can call this function."
+    );
+    _;
+  }
 
-    function get() public view returns (uint) {
-        return storedData;
-    }
+  function deposit() public payable onlyOwner {
+  }
 
-    function() external payable {
-      
-    }
+  function() external payable {
+    emit Paid(msg.sender, msg.value);
+  }
 }
