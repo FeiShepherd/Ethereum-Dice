@@ -3,8 +3,11 @@ pragma solidity ^0.5.0;
 contract DiceContract  {
   constructor() public { owner = msg.sender; }
   address payable owner;
+  uint8 constant threshold = 2;
+  uint8 constant odds = 0.40 * 10; //40 percent
 
-  event Paid(address indexed _from, uint _value);
+  event Won(address indexed _from, uint _value);
+  event Lost();
 
   modifier onlyOwner {
     require(
@@ -14,10 +17,19 @@ contract DiceContract  {
     _;
   }
 
-  function deposit() public payable onlyOwner {
+  function kill() external onlyOwner {
+    selfdestruct(owner);
   }
 
+  function deposit() public payable onlyOwner {}
+
   function() external payable {
-    emit Paid(msg.sender, msg.value);
+    require(msg.value < address(this).balance/threshold, "Send less than balance/2");
+    uint random = (uint(blockhash(block.number-1))%10 + 1);
+    if(random > odds){
+      emit Lost();
+    }else{
+      emit Won(msg.sender, msg.value);
+    }
   }
 }
