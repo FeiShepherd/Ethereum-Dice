@@ -5,9 +5,10 @@ const DEPOSIT_BALANCE = 1000
 const PAYOUT_MULTIPLIER = 2
 
 contract('DiceContract', async accounts => {
-  let instance
+  let instance, contractAddress
   beforeEach(async () => {
     instance = await DiceContract.new({from: accounts[0]})
+    contractAddress = instance.contract._address
     await instance.deposit({value: DEPOSIT_BALANCE})
   })
 
@@ -19,42 +20,62 @@ contract('DiceContract', async accounts => {
     let balance = await web3.eth.getBalance(instance.contract._address)
     assert.equal(balance, DEPOSIT_BALANCE)
   })
-  it('should have roughly 40 percent win rate', async () => {
-    let won = 0
-    let lost = 0
-    const iterations = 100
-    const acceptable = 0.49
-
-    console.log('rolling dice..')
-    for (let i = 0; i < iterations; i++) {
-      let result = await instance.sendTransaction({
-        from: accounts[0],
-        value: 500,
-      })
-
-      if(result.logs[0].event=='Won')
-        won++
-      else
-        lost++
-
-      if(i%10 === 0) console.log(`${won} won ${lost} lost`)
+  it('should send correct amount', async () => {
+    const oldBalances = {
+      gambler: reduceBigNumber(await web3.eth.getBalance(accounts[1])),
+      contract: parseInt(await web3.eth.getBalance(contractAddress)),
+    }
+    let dice = {
+      lost: 0,
+      won: 0,
+      done: false,
+      bet: 100,
     }
 
-    assert.okay(won/iterations < acceptable)
+    while (dice.won < 4 || dice.lost < 4) {
+      const result = await instance.sendTransaction({
+        from: accounts[1],
+        value: dice.bet,
+      })
+      if (getEvent(result) === 'Won') {
+        dice.won++
+      } else {
+        dice.lost++
+      }
+    }
+
+    const newBalances = {
+      gambler: reduceBigNumber(await web3.eth.getBalance(accounts[1])),
+      contract: parseInt(await web3.eth.getBalance(instance.contract._address)),
+    }
+    assert.equal(
+      oldBalances.gambler + oldBalances.contract,
+      newBalances.gambler + newBalances.contract,
+    )
   })
-  it('should throw if amount sent is above balance/3', async () => {
+  it('should throw if amount sent is above balance/2', async () => {
     let message
     try {
       let result = await instance.sendTransaction({
         from: accounts[0],
-        value: 1000,
+        value: DEPOSIT_BALANCE,
       })
     } catch (err) {
       message = err.message
     }
-    assert.equal(
-      message,
-      'Returned error: VM Exception while processing transaction: revert Send less than balance/2 -- Reason given: Send less than balance/2.',
-    )
+    assert.equal(typeof message, 'string')
   })
 })
+
+const getEvent = result => {
+  return result.logs[0].event
+}
+
+const subtractBigNumber = (number1, number2) => {
+  return reduceBigNumber(number1) - reduceBigNumber(number2)
+}
+
+const reduceBigNumber = number => {
+  number = number.toString()
+  return parseInt(number.substr(number.length - 5, number.length))
+}

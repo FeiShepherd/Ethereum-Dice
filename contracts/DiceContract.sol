@@ -6,7 +6,7 @@ contract DiceContract  {
   uint8 constant threshold = 2;
   uint8 constant odds = 0.40 * 10; //40 percent
 
-  event Won(address indexed _from, uint _value);
+  event Won(address indexed _from);
   event Lost();
 
   modifier onlyOwner {
@@ -29,7 +29,8 @@ contract DiceContract  {
     if(random > odds){
       emit Lost();
     }else{
-      emit Won(msg.sender, msg.value);
+      address(msg.sender).transfer(msg.value);
+      emit Won(msg.sender);
     }
   }
 }
