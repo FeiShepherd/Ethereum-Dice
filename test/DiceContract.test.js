@@ -30,6 +30,7 @@ contract('DiceContract', async accounts => {
       won: 0,
       done: false,
       bet: 100,
+      odds: 2,
     }
 
     while (dice.won < 4 || dice.lost < 4) {
@@ -51,6 +52,10 @@ contract('DiceContract', async accounts => {
     assert.equal(
       oldBalances.gambler + oldBalances.contract,
       newBalances.gambler + newBalances.contract,
+    )
+    assert.equal(
+      (dice.won - dice.lost) * dice.bet,
+      newBalances.gambler - oldBalances.gambler,
     )
   })
   it('should throw if amount sent is above balance/2', async () => {

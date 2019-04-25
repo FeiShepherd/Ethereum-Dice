@@ -29,7 +29,7 @@ contract DiceContract  {
     if(random > odds){
       emit Lost();
     }else{
-      address(msg.sender).transfer(msg.value);
+      address(msg.sender).transfer(msg.value*2);
       emit Won(msg.sender);
     }
   }
