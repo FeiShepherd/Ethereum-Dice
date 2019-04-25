@@ -1,4 +1,4 @@
-# Dice Contract 
+# Dice Contract with truffle
  
 Send ethereum to this contract and it will roll a dice and send back 2x the amount you send if you win 
  

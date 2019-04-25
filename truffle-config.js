@@ -51,6 +51,11 @@ module.exports = {
       port: 9545,            // Standard Ethereum port (default: none)
       network_id: "*",       // Any network (default: none)
     },
+    ganache: {
+      network_id: "5777",
+      host: "127.0.0.1",
+      port: 7545
+    }
 
     // Another network with more advanced options...
     // advanced: {
