@@ -4,8 +4,8 @@ Send ethereum to this contract and it will roll a dice and send back 2x the amou
  
 ## Installing
  
-npm install truffle -g
-npm install
+npm install truffle -g  
+npm install  
  
 ## Run tests  
   
